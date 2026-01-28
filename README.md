@@ -81,37 +81,7 @@ Both systems must set:
 AIO_INTEGRATION_SECRET=your-matching-secret-key
 ```
 
-**Token Generation (AIO):**
-```python
-import jwt
-from datetime import datetime, timedelta
-
-token = jwt.encode({
-    'user_id': user_id,
-    'test_id': test_id,
-    'iat': datetime.utcnow(),
-    'exp': datetime.utcnow() + timedelta(minutes=15)
-}, AIO_INTEGRATION_SECRET, algorithm='HS256')
-```
-
----
-
-## ⚠️ Critical Implementation Detail
-
-### **User Redirect MUST Use POST**
-
-After receiving success from Cogniview, AIO must redirect user via **POST form**:
-
-```html
-<form method="POST" action="https://trajectorie.onrender.com/load_quiz">
-  <input type="hidden" name="test_name" value="test-id-here">
-</form>
-<script>
-  document.getElementById('form-id').submit();
-</script>
-```
-
-**Why?** Cogniview's `load_quiz` requires POST with `test_name` parameter.
+**Usage:** AIO generates JWT token when launching users. Cogniview validates it.
 
 ---
 
@@ -166,9 +136,8 @@ https://your-domain.com
    - `POST /api/receive-test-results`
 
 2. **User Launch Flow:**
-   - Generate JWT token
-   - POST to Cogniview test-launch endpoint
-   - Redirect user via POST form
+   - Generate JWT token and POST to Cogniview
+   - Redirect user to Cogniview's load_quiz
 
 3. **Data Storage:**
    - Test metadata (competencies, questions)

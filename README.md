@@ -170,6 +170,7 @@ https://your-domain.com
 3. **Session Management:**
    - Create session from AIO user data
    - Store `return_url` for post-test redirect
+   - After sending results to AIO, redirect user to `return_url`
 
 ---
 

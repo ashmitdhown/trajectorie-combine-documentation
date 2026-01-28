@@ -85,6 +85,20 @@ AIO_INTEGRATION_SECRET=your-matching-secret-key
 
 ---
 
+## 🌐 Base URLs
+
+**Cogniview Base URL:**
+```
+https://trajectorie.onrender.com
+```
+*AIO needs this to send test launch requests*
+
+**AIO Base URL:**
+AIO team must provide their base URL (e.g., `https://aio-system.com`)
+*Cogniview needs this to send test metadata and results*
+
+---
+
 ## 📊 JSON Schemas
 
 All JSONs in `schemas/` are **direct examples** (not schema markup).

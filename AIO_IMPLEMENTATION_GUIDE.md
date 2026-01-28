@@ -1,156 +1,47 @@
-# AIO Integration - Implementation Guide
+# AIO Integration Guide
 
 **For:** AIO Development Team  
-**Purpose:** Complete checklist of what to build
+**Purpose:** What Cogniview will send to AIO and what AIO must provide
 
 ---
 
-## 🔧 Configuration
+## Configuration Required
 
-1. Set environment variable:
-   ```bash
-   AIO_INTEGRATION_SECRET=your-shared-secret-key
-   ```
-   **Important:** Must match Cogniview's secret exactly
-
-2. Install JWT library:
-   - Python: `pip install PyJWT`
-   - Node.js: `npm install jsonwebtoken`
-
-3. Configure base URLs:
-   - Your AIO base URL (e.g., `https://aio-system.com`)
-   - Cogniview base URL: `https://trajectorie.onrender.com`
-
----
-
-## 📋 Endpoints to Implement
-
-### 1. Receive Test Metadata
-
+**Environment Variable:**
+```bash
+AIO_INTEGRATION_SECRET=your-shared-secret-key
 ```
-POST /api/receive-test-metadata
-Content-Type: application/json
-```
+*Must match Cogniview's secret for JWT validation in Handshake 2*
 
-**When:** Cogniview sends this when admin creates/updates test
+**Base URL:**
+Provide your AIO base URL to Cogniview team (e.g., `https://aio-system.com`)
 
-**Receives:** See `schemas/test_metadata_sync.json`
-
-**Must Store:**
-- Test configuration (id, name, duration, mode, total marks)
-- Competency hierarchy
-- Question metadata
-
-**Must Return:**
+**JWT Token Format:**
+When generating `auth_token` for user launch, include these fields:
 ```json
 {
-  "success": true,
-  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
-  "message": "Test metadata received successfully"
-}
-```
-
----
-
-### 2. Receive Test Results
-
-```
-POST /api/receive-test-results
-Content-Type: application/json
-```
-
-**When:** Cogniview sends this after user completes test
-
-**Receives:** See `schemas/test_results_submission.json`
-
-**Must Store:**
-- Overall test score
-- Competency-wise scores
-- Sub-competency scores
-- Question-level time tracking
-
-**Must Return:**
-```json
-{
-  "success": true,
   "user_id": "EMP_789",
-  "test_id": "test-id",
-  "message": "Results received successfully"
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "iat": 1737964638,
+  "exp": 1737965538
 }
 ```
+- **Expiry:** 15 minutes from issuance
+- **Algorithm:** HS256
 
 ---
 
-## 🚀 User Launch Flow
+## What Cogniview Sends to AIO
 
-### When User Clicks "Attempt Test"
+### 1. Test Metadata (When Test Created)
 
-**Step 1: Generate JWT Token**
-
-```python
-import jwt
-from datetime import datetime, timedelta
-
-def generate_test_launch_token(user_id, test_id):
-    payload = {
-        'user_id': user_id,
-        'test_id': test_id,
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(minutes=15)
-    }
-    return jwt.encode(payload, AIO_INTEGRATION_SECRET, algorithm='HS256')
+**Cogniview calls:**
+```
+POST {AIO_BASE_URL}/api/receive-test-metadata
+Content-Type: application/json
 ```
 
-**Step 2: Send Launch Request**
-
-```python
-import requests
-
-response = requests.post(
-    'https://trajectorie.onrender.com/api/integration/test-launch',
-    json={
-        'user_id': 'EMP_789',
-        'user_name': 'johndoe123',
-        'first_name': 'John',
-        'last_name': 'Doe',
-        'test_id': '06fc6856-dc27-4756-a296-bca09272701c',
-        'auth_token': token,
-        'return_url': 'https://aio-system.com/dashboard'
-    }
-)
-
-if response.status_code == 200:
-    data = response.json()
-    redirect_url = data['redirect_url']
-    test_id = data['test_id']
-    # Proceed to step 3
-else:
-    # Handle error
-    error = response.json()
-    print(error['detail'])
-```
-
-**Step 3: Redirect User via POST Form**
-
-**CRITICAL:** Must use POST form (not GET redirect)
-
-```html
-<!-- Auto-submit form to redirect user -->
-<form method="POST" action="{{ redirect_url }}" id="launchForm">
-  <input type="hidden" name="test_name" value="{{ test_id }}">
-</form>
-<script>
-  document.getElementById('launchForm').submit();
-</script>
-```
-
-**Why POST?** Cogniview's `load_quiz` endpoint requires POST with `test_name` parameter.
-
----
-
-## 📊 Data Formats
-
-### Test Metadata Example
+**You receive:**
 ```json
 {
   "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
@@ -164,40 +55,147 @@ else:
 }
 ```
 
-### Test Results Example
+**Complete schema:** `schemas/test_metadata_sync.json`
+
+**You must return:**
+```json
+{
+  "success": true,
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "message": "Test metadata received successfully"
+}
+```
+
+**Error (if data invalid):**
+```json
+{
+  "success": false,
+  "detail": "Invalid test metadata format or missing required fields"
+}
+```
+
+---
+
+### 2. Test Results (When User Completes Test)
+
+**Cogniview calls:**
+```
+POST {AIO_BASE_URL}/api/receive-test-results
+Content-Type: application/json
+```
+
+**You receive:**
 ```json
 {
   "user_id": "EMP_789",
   "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
   "completion_status": "COMPLETED",
   "total_score_obtained": 40,
-  "detailed_response": [...]
+  "detailed_response": [
+    {
+      "competency_id": "COMP_LEAD",
+      "competency_name": "Leadership Excellence",
+      "sub_competencies": [
+        {
+          "sub_competency_id": "APRCNCUST_LVL1",
+          "sub_competency_name": "Appreciation of Customer Needs",
+          "marks_obtained_sub_competency": 8,
+          "time_taken_sec": 205,
+          "questions": [
+            {
+              "question_id": "0235cfbb-af34-409b-a420-bb9a5ccf18dd",
+              "time_taken_sec": 95
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 ```
 
-See `schemas/` folder for complete examples.
+**Complete schema:** `schemas/test_results_submission.json`
+
+**You must return:**
+```json
+{
+  "success": true,
+  "user_id": "EMP_789",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "message": "Results received successfully"
+}
+```
+
+**Error (if data invalid):**
+```json
+{
+  "success": false,
+  "detail": "Invalid results data format or missing required fields"
+}
+```
 
 ---
 
-## ⚠️ Important Rules
+## What AIO Sends to Cogniview
 
-1. **POST Form Redirect** - User must be redirected via POST (not GET)
-2. **JWT Expiration** - Tokens expire in 15 minutes
-3. **Shared Secret** - Must match Cogniview's secret exactly
-4. **HTTPS Only** - All requests must use HTTPS in production
-5. **Return URL** - User returns here after completing test
+### User Launch (When User Clicks "Attempt Test")
+
+**You call:**
+```
+POST https://trajectorie.onrender.com/api/integration/test-launch
+Content-Type: application/json
+```
+
+**You send:**
+```json
+{
+  "user_id": "EMP_789",
+  "user_name": "johndoe123",
+  "first_name": "John",
+  "last_name": "Doe",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "return_url": "https://aio-system.com/dashboard"
+}
+```
+
+**Complete schema:** `schemas/test_launch_request.json`
+
+**Notes:**
+- `auth_token`: JWT token with user_id and test_id (expires in 15 mins)
+- `return_url`: Where user returns after completing test
+
+**Cogniview returns (success):**
+```json
+{
+  "success": true,
+  "user_id": "EMP_789",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "redirect_url": "https://trajectorie.onrender.com/load_quiz",
+  "message": "User authenticated successfully"
+}
+```
+
+**After receiving success:**
+User must be redirected to `redirect_url` using:
+- **Method:** POST (required - Cogniview rejects GET)
+- **Content-Type:** application/x-www-form-urlencoded
+- **Parameter:** `test_name` with value = `test_id`
+
+**Possible errors:** See `schemas/test_launch_errors.json`
 
 ---
 
-## ✅ Testing Checklist
+## Summary
 
-- [ ] Can receive and store test metadata
-- [ ] Can receive and store test results
-- [ ] Can generate valid JWT tokens
-- [ ] Can POST launch request to Cogniview
-- [ ] User successfully redirects to Cogniview (POST form)
-- [ ] User sees test instructions
-- [ ] User completes test
-- [ ] Results received in AIO
-- [ ] User redirects back to AIO dashboard
+### Endpoints AIO Must Implement:
+1. `POST /api/receive-test-metadata` - Receives test configuration
+2. `POST /api/receive-test-results` - Receives test results
+
+### Endpoint AIO Calls:
+1. `POST /api/integration/test-launch` - Launches user to Cogniview
+
+### Data Schemas:
+All complete JSON examples in `schemas/` folder
+
 

@@ -1,0 +1,23 @@
+{
+    "test_not_found": {
+        "status": 404,
+        "response": {
+            "success": false,
+            "detail": "Test not found: 06fc6856-dc27-4756-a296-bca09272701c"
+        }
+    },
+    "invalid_token": {
+        "status": 401,
+        "response": {
+            "success": false,
+            "detail": "Authentication token is invalid or expired"
+        }
+    },
+    "missing_required_fields": {
+        "status": 400,
+        "response": {
+            "success": false,
+            "detail": "Missing required fields: user_id, test_id, auth_token, user_name, first_name, last_name, return_url"
+        }
+    }
+}

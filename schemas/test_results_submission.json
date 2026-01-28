@@ -1,0 +1,68 @@
+{
+    "user_id": "EMP_789",
+    "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+    "completion_status": "COMPLETED",
+    "total_score_obtained": 40,
+    "detailed_response": [
+        {
+            "competency_id": "COMP_LEAD",
+            "competency_name": "Leadership Excellence",
+            "sub_competencies": [
+                {
+                    "sub_competency_id": "APRCNCUST_LVL1",
+                    "sub_competency_name": "Appreciation of Customer Needs",
+                    "marks_obtained_sub_competency": 8,
+                    "time_taken_sec": 205,
+                    "questions": [
+                        {
+                            "question_id": "0235cfbb-af34-409b-a420-bb9a5ccf18dd",
+                            "time_taken_sec": 95
+                        },
+                        {
+                            "question_id": "14ff43da-ec17-4ae7-ad9b-a70b3b0c8c8f",
+                            "time_taken_sec": 110
+                        }
+                    ]
+                },
+                {
+                    "sub_competency_id": "MITIGATION_LVL1",
+                    "sub_competency_name": "Ideas of Mitigation",
+                    "marks_obtained_sub_competency": 14,
+                    "time_taken_sec": 205,
+                    "questions": [
+                        {
+                            "question_id": "0ef22043-0314-482e-9d50-43b67c145338",
+                            "time_taken_sec": 95
+                        },
+                        {
+                            "question_id": "3f20bf3c-5cdb-4d88-bc2c-8e165c0daee1",
+                            "time_taken_sec": 110
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "competency_id": "COMP_STRAT",
+            "competency_name": "Strategic Thinking",
+            "sub_competencies": [
+                {
+                    "sub_competency_id": "VISION_LVL2",
+                    "sub_competency_name": "Visionary Leadership",
+                    "marks_obtained_sub_competency": 18,
+                    "time_taken_sec": 240,
+                    "questions": [
+                        {
+                            "question_id": "1f020627-ebcb-410e-bb4b-855909c7f741",
+                            "time_taken_sec": 115
+                        },
+                        {
+                            "question_id": "14ff43da-ec17-4ae7-ad9b-a70b3b0c8c8f",
+                            "time_taken_sec": 125
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

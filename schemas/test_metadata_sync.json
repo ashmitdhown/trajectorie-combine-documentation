@@ -1,0 +1,61 @@
+{
+    "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+    "test_name": "Senior Management Assessment",
+    "duration_min": 45,
+    "number_of_questions": 30,
+    "mode": "assessment",
+    "total_marks": 144,
+    "competencies": [
+        {
+            "competency_id": "COMP_LEAD",
+            "competency_name": "Leadership Excellence",
+            "sub_competencies": [
+                {
+                    "sub_competency_id": "APRCNCUST_LVL1",
+                    "sub_competency_name": "Appreciation of Customer Needs",
+                    "max_score_for_sub_competency": 10
+                },
+                {
+                    "sub_competency_id": "MITIGATION_LVL1",
+                    "sub_competency_name": "Ideas of Mitigation",
+                    "max_score_for_sub_competency": 15
+                }
+            ]
+        },
+        {
+            "competency_id": "COMP_STRAT",
+            "competency_name": "Strategic Thinking",
+            "sub_competencies": [
+                {
+                    "sub_competency_id": "VISION_LVL2",
+                    "sub_competency_name": "Visionary Leadership",
+                    "max_score_for_sub_competency": 20
+                }
+            ]
+        }
+    ],
+    "questions": [
+        {
+            "question_id": "14ff43da-ec17-4ae7-ad9b-a70b3b0c8c8f",
+            "question_text": "Match the following & type the relevant alphabet in the space",
+            "competency_id": "COMP_LEAD",
+            "competency_name": "Leadership Excellence",
+            "sub_competency_id": "APRCNCUST_LVL1",
+            "sub_competency_name": "Appreciation of Customer Needs",
+            "max_score": 10,
+            "time_alloted_seconds": 120,
+            "question_type": "match_the_column"
+        },
+        {
+            "question_id": "39882a88-c8da-408b-b607-250d92221e05",
+            "question_text": "Mark whether true or false",
+            "competency_id": "COMP_LEAD",
+            "competency_name": "Leadership Excellence",
+            "sub_competency_id": "MITIGATION_LVL1",
+            "sub_competency_name": "Ideas of Mitigation",
+            "max_score": 15,
+            "time_alloted_seconds": 180,
+            "question_type": "true_false"
+        }
+    ]
+}

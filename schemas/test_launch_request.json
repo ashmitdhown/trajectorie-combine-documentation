@@ -1,0 +1,9 @@
+{
+    "user_id": "EMP_789",
+    "user_name": "johndoe123",
+    "first_name": "John",
+    "last_name": "Doe",
+    "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+    "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "return_url": "https://aio-system.com/dashboard"
+}

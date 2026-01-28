@@ -12,7 +12,7 @@ integration_docs/
 ├── README.md                      ← You are here
 ├── API_OVERVIEW.md                ← Complete API reference
 ├── AIO_IMPLEMENTATION_GUIDE.md    ← What AIO team must build
-└── schemas/                       ← JSON examples (7 files)
+└── schemas/                       ← JSON examples (6 files)
     ├── test_metadata_sync.json
     ├── test_launch_request.json
     ├── test_launch_success.json

@@ -55,32 +55,25 @@ Both systems use **JSON Web Tokens (JWT)** with a shared secret.
 AIO_INTEGRATION_SECRET=your-shared-secret-key
 ```
 
-**Token Generation (AIO):**
-```python
-import jwt
-from datetime import datetime, timedelta
-
-token = jwt.encode({
-    'user_id': 'EMP_789',
-    'test_id': 'test-uuid',
-    'iat': datetime.utcnow(),
-    'exp': datetime.utcnow() + timedelta(minutes=15)
-}, AIO_INTEGRATION_SECRET, algorithm='HS256')
+**JWT Payload Format (AIO must include):**
+```json
+{
+  "user_id": "EMP_789",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "iat": 1737964638,
+  "exp": 1737965538
+}
 ```
 
-**Token Validation (Cogniview):**
-```python
-import jwt
+**Required Fields:**
+- `user_id`: User identifier from AIO system
+- `test_id`: Test identifier
+- `iat`: Issued at timestamp (current time)
+- `exp`: Expiration timestamp (iat + 15 minutes)
 
-try:
-    payload = jwt.decode(token, AIO_INTEGRATION_SECRET, algorithms=['HS256'])
-    user_id = payload['user_id']
-    test_id = payload['test_id']
-except jwt.ExpiredSignatureError:
-    # Token expired
-except jwt.InvalidTokenError:
-    # Invalid token
-```
+**Token Expiry:** 15 minutes
+
+**Algorithm:** HS256
 
 ---
 
@@ -109,7 +102,7 @@ STEP 2: TEST LAUNCH
           ↓
    Returns redirect_url to AIO
           ↓
-   AIO redirects user via POST form
+   AIO redirects user to Cogniview
           ↓
    User lands on Cogniview test (instructions → quiz)
 
@@ -227,21 +220,12 @@ See `schemas/test_launch_errors.json` for complete error details
 
 ### Step 2: AIO Redirects User
 
-After receiving success response, AIO must redirect user via **POST form**:
+After receiving success, AIO redirects user to `redirect_url` returned by Cogniview.
 
-```html
-<form method="POST" action="https://trajectorie.onrender.com/load_quiz" id="launchForm">
-  <input type="hidden" name="test_name" value="06fc6856-dc27-4756-a296-bca09272701c">
-</form>
-<script>
-  document.getElementById('launchForm').submit();
-</script>
-```
-
-**Important:** 
-- Must use POST (not GET)
-- Form field name: `test_name`
-- Form value: `test_id` from request
+**Redirect Details:**
+- URL: Use `redirect_url` from success response
+- Method: POST
+- Parameter: `test_name` with value = `test_id`
 
 ### Step 3: User Experience
 

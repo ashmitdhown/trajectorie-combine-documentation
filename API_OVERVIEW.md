@@ -281,6 +281,19 @@ Example:
 
 See `schemas/error_responses.json` → `results_submission_errors` for details
 
+### Post-Submission: User Redirect
+
+After successfully sending results to AIO, Cogniview must redirect user to the `return_url` provided in the initial test launch request (Handshake 2).
+
+**Example:**
+```python
+# After sending results to AIO
+return_url = session.get('return_url', 'https://aio-system.com/dashboard')
+return redirect(return_url)
+```
+
+User returns to AIO dashboard where they can see their test completion status.
+
 ---
 
 ## Error Handling

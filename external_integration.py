@@ -13,8 +13,15 @@ from datetime import datetime
 # Create blueprint for external integration
 external_bp = Blueprint('external_integration', __name__)
 
-# Get Firebase client
-db = firestore.client()
+# Lazy initialization for Firebase client (avoid import-time initialization)
+_db = None
+
+def get_db():
+    """Get Firestore client with lazy initialization."""
+    global _db
+    if _db is None:
+        _db = firestore.client()
+    return _db
 
 # Get integration secret from environment
 INTEGRATION_SECRET = os.environ.get('INTEGRATION_SECRET', '')
@@ -104,7 +111,7 @@ def test_launch():
         # ═════════════════════════════════════════════════════════
         
         # Check if test exists in created_tests collection
-        test_query = db.collection('created_tests').where('test_id', '==', test_id).limit(1).stream()
+        test_query = get_db().collection('created_tests').where('test_id', '==', test_id).limit(1).stream()
         test_dict = None
         
         for doc in test_query:
@@ -249,7 +256,7 @@ def sync_test_metadata_to_external(test_id):
             return False
 
         # 1. Fetch test details
-        test_query = db.collection('created_tests').where('test_id', '==', test_id).limit(1).stream()
+        test_query = get_db().collection('created_tests').where('test_id', '==', test_id).limit(1).stream()
         test_data = None
         for doc in test_query:
             test_data = doc.to_dict()
@@ -352,6 +359,4 @@ def sync_test_metadata_to_external(test_id):
         import traceback
         traceback.print_exc()
         return False
-
-
 

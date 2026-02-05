@@ -52,7 +52,7 @@ integration_docs/
 
 **1. Test Metadata Sync** (Cogniview → AIO)
 - **When:** Admin creates/updates test
-- **Endpoint:** `POST {AIO}/api/receive-test-metadata`
+- **Endpoint:** `POST {AIO}/api/TestSystem/CreateCogniviewTest`
 - **JSON:** `test_metadata_sync.json`
 
 **2. Test Launch** (AIO → Cogniview → User)
@@ -146,7 +146,7 @@ https://your-domain.com
 ## What AIO Must Build
 
 1. **2 Endpoints:**
-   - `POST /api/receive-test-metadata`
+   - `POST /api/TestSystem/CreateCogniviewTest`
    - `POST /api/receive-test-results`
 
 2. **User Launch Flow:**

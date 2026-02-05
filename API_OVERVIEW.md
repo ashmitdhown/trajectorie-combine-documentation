@@ -87,7 +87,7 @@ AIO_INTEGRATION_SECRET=your-shared-secret-key
 STEP 1: TEST METADATA SYNC
    Admin creates test in Cogniview
           ↓
-   Cogniview → POST /api/receive-test-metadata → AIO
+   Cogniview → POST /api/TestSystem/CreateCogniviewTest → AIO
           ↓
    AIO stores test config and shows to users
 
@@ -126,7 +126,7 @@ STEP 3: RESULTS SUBMISSION
 
 ### Endpoint (AIO must implement)
 ```
-POST {AIO_BASE_URL}/api/receive-test-metadata
+POST {AIO_BASE_URL}/api/TestSystem/CreateCogniviewTest
 ```
 
 ### Request Headers

@@ -349,7 +349,7 @@ Password: trajectorie@01
 - `POST /api/integration/test-launch` - Test launch from AIO (JWT required)
 
 #### AIO Endpoints (To be implemented by AIO team):
-- `POST {AIO_URL}/api/receive-test-metadata` - Receive test metadata
+- `POST {AIO_URL}/api/TestSystem/CreateCogniviewTest` - Receive test metadata
 - `POST {AIO_URL}/api/receive-test-results` - Receive results
 
 ---

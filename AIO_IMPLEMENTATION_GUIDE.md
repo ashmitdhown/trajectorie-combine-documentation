@@ -37,7 +37,7 @@ When generating `auth_token` for user launch, include these fields:
 
 **Cogniview calls:**
 ```
-POST {AIO_BASE_URL}/api/receive-test-metadata
+POST {AIO_BASE_URL}/api/TestSystem/CreateCogniviewTest
 Content-Type: application/json
 ```
 
@@ -189,7 +189,7 @@ User must be redirected to `redirect_url` using:
 ## Summary
 
 ### Endpoints AIO Must Implement:
-1. `POST /api/receive-test-metadata` - Receives test configuration
+1. `POST /api/TestSystem/CreateCogniviewTest` - Receives test configuration
 2. `POST /api/receive-test-results` - Receives test results
 
 ### Endpoint AIO Calls:

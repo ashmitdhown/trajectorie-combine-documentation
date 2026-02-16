@@ -294,7 +294,7 @@ Images for questions are stored on Google Drive and accessed via a proxy service
 
 **`.env.integration` file:**
 ```
-INTEGRATION_SECRET=qYx9f4K8mZ2V7cW6e1D0B3TQJvLkH5pA0N6M4RrS8E=
+INTEGRATION_SECRET=your-key-here
 EXTERNAL_AUTH_TOKEN=your-static-bearer-token
 EXTERNAL_BASE_URL=https://digital.trajectorie.com/TrajectorieAllinOne_UAT
 ```
@@ -400,11 +400,6 @@ gunicorn app:app
 **File:** `config/firebase_credentials.json`  
 **Note:** Must be manually placed (gitignored)
 
-**Firebase Console Access:**
-```
-Email: combine@trajectorie.com
-Password: trajectorie@01
-```
 
 **Variable:** `INTEGRATION_SECRET`, `EXTERNAL_AUTH_TOKEN`  
 **Value:** See `.env.integration`

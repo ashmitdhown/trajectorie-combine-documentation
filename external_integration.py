@@ -23,8 +23,9 @@ def get_db():
         _db = firestore.client()
     return _db
 
-# Get integration secret from environment
-INTEGRATION_SECRET = os.environ.get('INTEGRATION_SECRET', '')
+# Get configuration from environment
+INTEGRATION_SECRET = os.environ.get('INTEGRATION_SECRET', '') # This is the KEY used to verify JWTs
+EXTERNAL_AUTH_TOKEN = os.environ.get('EXTERNAL_AUTH_TOKEN', '') # This is the actual Token for the Bearer header
 
 
 @external_bp.route('/api/integration/test-launch', methods=['POST'])
@@ -74,7 +75,7 @@ def test_launch():
         # ═════════════════════════════════════════════════════════
         
         try:
-            # Decode and validate JWT token
+            # Decode and validate JWT token using the INTEGRATION_SECRET (the key)
             payload = jwt.decode(
                 auth_token,
                 INTEGRATION_SECRET,
@@ -201,13 +202,19 @@ def send_results_to_external_system(user_id, test_id, results_data):
             'detailed_response': results_data.get('detailed_response', [])
         }
         
+        # Prepare headers with Authorization using the static Bearer token
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f"Bearer {EXTERNAL_AUTH_TOKEN}"
+        }
+        
         # Send to external system
-        endpoint = f"{external_base_url}/api/receive-test-results"
+        endpoint = f"{external_base_url}/api/TestSystem/SubmitCogniviewResult"
         
         response = requests.post(
             endpoint,
             json=payload,
-            headers={'Content-Type': 'application/json'},
+            headers=headers,
             timeout=10
         )
         
@@ -338,12 +345,17 @@ def sync_test_metadata_to_external(test_id):
             "questions": questions_list
         }
 
-        # 5. Push to AIO
-        endpoint = f"{external_base_url}/api/receive-test-metadata"
+        # 5. Push to AIO with Authorization using the static Bearer token
+        endpoint = f"{external_base_url}/api/TestSystem/CreateCogniviewTest"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f"Bearer {EXTERNAL_AUTH_TOKEN}"
+        }
+        
         response = requests.post(
             endpoint,
             json=payload,
-            headers={'Content-Type': 'application/json'},
+            headers=headers,
             timeout=15
         )
         

@@ -295,7 +295,8 @@ Images for questions are stored on Google Drive and accessed via a proxy service
 **`.env.integration` file:**
 ```
 INTEGRATION_SECRET=qYx9f4K8mZ2V7cW6e1D0B3TQJvLkH5pA0N6M4RrS8E=
-EXTERNAL_BASE_URL=https://aio-system.com
+EXTERNAL_AUTH_TOKEN=your-static-bearer-token
+EXTERNAL_BASE_URL=https://digital.trajectorie.com/TrajectorieAllinOne_UAT
 ```
 
 ---
@@ -315,13 +316,6 @@ https://trajectorie.onrender.com
 ```
 https://console.firebase.google.com/project/trajectorie-f93b8
 ```
-
-**Firestore Database:**
-```
-Email: combine@trajectorie.com
-Password: trajectorie@01
-```
-
 ### 4.3 Key API Endpoints
 
 #### Public:
@@ -350,7 +344,7 @@ Password: trajectorie@01
 
 #### AIO Endpoints (To be implemented by AIO team):
 - `POST {AIO_URL}/api/TestSystem/CreateCogniviewTest` - Receive test metadata
-- `POST {AIO_URL}/api/receive-test-results` - Receive results
+- `POST {AIO_URL}/api/TestSystem/SubmitCogniviewResult` - Receive results
 
 ---
 
@@ -412,12 +406,11 @@ Email: combine@trajectorie.com
 Password: trajectorie@01
 ```
 
-### 6.2 AIO Integration Secret
+**Variable:** `INTEGRATION_SECRET`, `EXTERNAL_AUTH_TOKEN`  
+**Value:** See `.env.integration`
 
-**Variable:** `AIO_INTEGRATION_SECRET`  
-**Value:** `qYx9f4K8mZ2V7cW6e1D0B3TQJvLkH5pA0N6M4RrS8E=`
-
-Used for JWT token generation/validation between AIO and Cogniview.
+`INTEGRATION_SECRET` is used for JWT validation (AIO → Cogniview).  
+`EXTERNAL_AUTH_TOKEN` is used for Bearer authorization (Cogniview → AIO).
 
 ### 6.3 Flask Session Secret
 
@@ -658,8 +651,8 @@ For developers working on AIO or other external system integration, comprehensiv
 3. **Results Submission:** Cogniview → AIO (after test completion)
 
 **Base URL Requirements:**
-- **Cogniview:** `https://trajectorie.onrender.com` (To be changed in near future)
-- **AIO:** To be provided by AIO team
+- **Cogniview:** `https://trajectorie.onrender.com` (Target URL for AIO launch requests)
+- **AIO:** `https://digital.trajectorie.com/TrajectorieAllinOne_UAT` (Example UAT URL)
 
 ---
 

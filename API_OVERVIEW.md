@@ -1,61 +1,20 @@
-# Cogniview API Integration Documentation
+# AIO Integration Guide
 
-**Version:** 1.0  
-**Last Updated:** January 28, 2026  
-
----
-
-## Table of Contents
-
-1. [Introduction](#introduction)
-2. [Base URL Configuration](#base-url-configuration)
-3. [Authentication](#authentication)
-4. [Integration Flow](#integration-flow)
-5. [Handshake 1: Test Metadata Sync](#handshake-1-test-metadata-sync)
-6. [Handshake 2: Test Launch](#handshake-2-test-launch)
-7. [Handshake 3: Results Submission](#handshake-3-results-submission)
-8. [Error Handling](#error-handling)
+**For:** AIO Development Team  
+**Purpose:** What Cogniview will send to AIO and what AIO must provide
 
 ---
 
-## Introduction
+## Configuration Required
 
-The Cogniview API enables seamless integration with external Assessment and Interview Orchestration (AIO) systems. This RESTful API facilitates:
+**INTEGRATION_SECRET:** (Used for JWT validation)
+**EXTERNAL_AUTH_TOKEN:** (Your static Bearer token used for authorization)
 
-- **Test Metadata Synchronization**: Push test configurations from Cogniview to AIO
-- **Secure Test Launch**: Users from AIO can launch tests in Cogniview
-- **Results Submission**: Send comprehensive test results back to AIO
+**Base URL:**
+Provide your AIO base URL to Cogniview team (e.g., `https://aio-system.com`)
 
----
-
-## Base URL Configuration
-
-### Current Deployment (Render)
-```
-https://trajectorie.onrender.com
-```
-
-### Future Deployment (GoDaddy)
-```
-https://your-domain.com
-```
-
-**Migration:** Only base URL changes. All endpoints remain the same.
-
----
-
-## Authentication
-
-### JWT Token Authentication
-
-Both systems use **JSON Web Tokens (JWT)** with a shared secret.
-
-**Environment Variable (both systems):**
-```bash
-AIO_INTEGRATION_SECRET=your-shared-secret-key
-```
-
-**JWT Payload Format (AIO must include):**
+**JWT Token Format:**
+When generating `auth_token` for user launch, include these fields:
 ```json
 {
   "user_id": "EMP_789",
@@ -64,80 +23,23 @@ AIO_INTEGRATION_SECRET=your-shared-secret-key
   "exp": 1737965538
 }
 ```
-
-**Required Fields:**
-- `user_id`: User identifier from AIO system
-- `test_id`: Test identifier
-- `iat`: Issued at timestamp (current time)
-- `exp`: Expiration timestamp (iat + 15 minutes)
-
-**Token Expiry:** 15 minutes
-
-**Algorithm:** HS256
+- **Expiry:** 15 minutes from issuance
+- **Algorithm:** HS256
 
 ---
 
-## Integration Flow
+## What Cogniview Sends to AIO
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  COMPLETE INTEGRATION FLOW               │
-└─────────────────────────────────────────────────────────┘
+### 1. Test Metadata (When Test Created)
 
-STEP 1: TEST METADATA SYNC
-   Admin creates test in Cogniview
-          ↓
-   Cogniview → POST /api/TestSystem/CreateCogniviewTest → AIO
-          ↓
-   AIO stores test config and shows to users
-
-STEP 2: TEST LAUNCH  
-   User clicks "Attempt Test" in AIO
-          ↓
-   AIO generates JWT token
-          ↓
-   AIO → POST /api/integration/test-launch → Cogniview
-          ↓
-   Cogniview validates token, creates session
-          ↓
-   Returns redirect_url to AIO
-          ↓
-   AIO redirects user to Cogniview
-          ↓
-   User lands on Cogniview test (instructions → quiz)
-
-STEP 3: RESULTS SUBMISSION
-   User completes test in Cogniview
-          ↓
-   Cogniview stores results in database
-          ↓
-   Cogniview → POST /api/receive-test-results → AIO
-          ↓
-   User redirects back to AIO dashboard
-```
-
----
-
-## Handshake 1: Test Metadata Sync
-
-**Direction:** Cogniview → AIO  
-**Trigger:** Automatically when admin creates test in Cogniview  
-**Note:** Cogniview sends this data automatically. No manual action required.
-
-### Endpoint (AIO must implement)
+**Cogniview calls:**
 ```
 POST {AIO_BASE_URL}/api/TestSystem/CreateCogniviewTest
-```
-
-### Request Headers
-```
 Content-Type: application/json
+Authorization: Bearer {EXTERNAL_AUTH_TOKEN}
 ```
 
-### Request Body
-See `schemas/test_metadata_sync.json` for complete schema.
-
-Example:
+**You receive:**
 ```json
 {
   "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
@@ -151,7 +53,9 @@ Example:
 }
 ```
 
-### Success Response (HTTP 200)
+**Complete schema:** `schemas/test_metadata_sync.json`
+
+**You must return:**
 ```json
 {
   "success": true,
@@ -160,34 +64,88 @@ Example:
 }
 ```
 
-### Error Responses
-- **400 Bad Request:** Invalid data format or missing required fields
-
-See `schemas/error_responses.json` → `metadata_sync_errors` for details
+**Error (if data invalid):**
+```json
+{
+  "success": false,
+  "detail": "Invalid test metadata format or missing required fields"
+}
+```
 
 ---
 
-## Handshake 2: Test Launch
+### 2. Test Results (When User Completes Test)
 
-**Direction:** AIO → Cogniview → User  
-**Trigger:** User clicks "Attempt Test" in AIO
-
-### Step 1: AIO Sends Launch Request
-
-**Endpoint (Cogniview will implement):**
+**Cogniview calls:**
 ```
-POST {COGNIVIEW_BASE_URL}/api/integration/test-launch
+POST {AIO_BASE_URL}/api/TestSystem/SubmitCogniviewResult
+Content-Type: application/json
+Authorization: Bearer {EXTERNAL_AUTH_TOKEN}
 ```
 
-**Request Headers:**
+**You receive:**
+```json
+{
+  "user_id": "EMP_789",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "completion_status": "COMPLETED",
+  "total_score_obtained": 40,
+  "detailed_response": [
+    {
+      "competency_id": "COMP_LEAD",
+      "competency_name": "Leadership Excellence",
+      "sub_competencies": [
+        {
+          "sub_competency_id": "APRCNCUST_LVL1",
+          "sub_competency_name": "Appreciation of Customer Needs",
+          "marks_obtained_sub_competency": 8,
+          "time_taken_sec": 205,
+          "questions": [
+            {
+              "question_id": "0235cfbb-af34-409b-a420-bb9a5ccf18dd",
+              "time_taken_sec": 95
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
+
+**Complete schema:** `schemas/test_results_submission.json`
+
+**You must return:**
+```json
+{
+  "success": true,
+  "user_id": "EMP_789",
+  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
+  "message": "Results received successfully"
+}
+```
+
+**Error (if data invalid):**
+```json
+{
+  "success": false,
+  "detail": "Invalid results data format or missing required fields"
+}
+```
+
+---
+
+## What AIO Sends to Cogniview
+
+### User Launch (When User Clicks "Attempt Test")
+
+**You call:**
+```
+POST https://trajectorie.onrender.com/api/integration/test-launch
 Content-Type: application/json
 ```
 
-**Request Body:**
-See `schemas/test_launch_request.json` for complete schema.
-
-Example:
+**You send:**
 ```json
 {
   "user_id": "EMP_789",
@@ -200,7 +158,13 @@ Example:
 }
 ```
 
-**Success Response from Cogniview (HTTP 200):**
+**Complete schema:** `schemas/test_launch_request.json`
+
+**Notes:**
+- `auth_token`: JWT token with user_id and test_id (expires in 15 mins)
+- `return_url`: Where user returns after completing test
+
+**Cogniview returns (success):**
 ```json
 {
   "success": true,
@@ -211,128 +175,26 @@ Example:
 }
 ```
 
-**Error Responses:**
-- **401 Unauthorized:** Invalid/expired auth_token
-- **404 Not Found:** Test not found
-- **400 Bad Request:** Missing required fields
+**After receiving success:**
+User must be redirected to `redirect_url` using:
+- **Method:** POST (required - Cogniview rejects GET)
+- **Content-Type:** application/x-www-form-urlencoded
+- **Parameter:** `test_name` with value = `test_id`
 
-See `schemas/test_launch_errors.json` for complete error details
-
-### Step 2: AIO Redirects User
-
-After receiving success, AIO redirects user to `redirect_url` returned by Cogniview.
-
-**Redirect Details:**
-- URL: Use `redirect_url` from success response
-- Method: POST
-- Parameter: `test_name` with value = `test_id`
-
-### Step 3: User Experience
-
-1. User lands on Cogniview test page
-2. Instructions screen shows automatically
-3. User clicks "Start Test"
-4. Quiz loads with questions
-5. After completion, user redirects to `return_url`
+**Possible errors:** See `schemas/test_launch_errors.json`
 
 ---
 
-## Handshake 3: Results Submission
+## Summary
 
-**Direction:** Cogniview → AIO  
-**Trigger:** User submits test in Cogniview
+### Endpoints AIO Must Implement:
+1. `POST /api/TestSystem/CreateCogniviewTest` - Receives test configuration
+2. `POST /api/TestSystem/SubmitCogniviewResult` - Receives test results
 
-### Endpoint (AIO must implement)
-```
-POST {AIO_BASE_URL}/api/receive-test-results
-```
+### Endpoint AIO Calls:
+1. `POST /api/integration/test-launch` - Launches user to Cogniview
 
-### Request Headers
-```
-Content-Type: application/json
-```
+### Data Schemas:
+All complete JSON examples in `schemas/` folder
 
-### Request Body
-See `schemas/test_results_submission.json` for complete schema.
 
-Example:
-```json
-{
-  "user_id": "EMP_789",
-  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
-  "completion_status": "COMPLETED",
-  "total_score_obtained": 40,
-  "detailed_response": [...]
-}
-```
-
-### Success Response from AIO (HTTP 200)
-```json
-{
-  "success": true,
-  "user_id": "EMP_789",
-  "test_id": "06fc6856-dc27-4756-a296-bca09272701c",
-  "message": "Results received successfully"
-}
-```
-
-### Error Responses
-- **400 Bad Request:** Invalid data format or missing required fields
-
-See `schemas/error_responses.json` → `results_submission_errors` for details
-
-### Post-Submission: User Redirect
-
-After successfully sending results to AIO, Cogniview must redirect user to the `return_url` provided in the initial test launch request (Handshake 2).
-
-**Example:**
-```python
-# After sending results to AIO
-return_url = session.get('return_url', 'https://aio-system.com/dashboard')
-return redirect(return_url)
-```
-
-User returns to AIO dashboard where they can see their test completion status.
-
----
-
-## Error Handling
-
-All errors follow this format:
-
-```json
-{
-  "success": false,
-  "detail": "Human-readable error message"
-}
-```
-
-### Common Errors
-
-**Test Not Found (404)**
-```json
-{
-  "success": false,
-  "detail": "Test not found: 06fc6856-dc27-4756-a296-bca09272701c"
-}
-```
-
-**Invalid Token (401)**
-```json
-{
-  "success": false,
-  "detail": "Authentication token is invalid or expired"
-}
-```
-
-**Missing Fields (400)**
-```json
-{
-  "success": false,
-  "detail": "Missing required fields: user_id, test_id, auth_token"
-}
-```
-
-See `schemas/error_responses.json` for complete list.
-
-**End of API Documentation**

@@ -67,7 +67,7 @@ integration_docs/
 
 **3. Results Submission** (Cogniview → AIO)
 - **When:** User submits test
-- **Endpoint:** `POST {AIO}/api/receive-test-results`
+- **Endpoint:** `POST {AIO}/api/TestSystem/SubmitCogniviewResult`
 - **JSON:** `test_results_submission.json`
 
 ---
@@ -76,12 +76,18 @@ integration_docs/
 
 **Method:** JWT with shared secret
 
-Both systems must set:
+Both systems must set (in `.env.integration`):
 ```bash
-AIO_INTEGRATION_SECRET=your-matching-secret-key
+# Security Key for JWT validation (AIO -> Cogniview)
+INTEGRATION_SECRET=your-shared-secret-key
+
+# Static Token for Bearer Authorization (Cogniview -> AIO)
+EXTERNAL_AUTH_TOKEN=your-matching-bearer-token
 ```
 
-**Usage:** AIO generates JWT token when launching users. Cogniview validates it.
+**Usage:** 
+1. **AIO $\rightarrow$ Cogniview**: AIO generates JWT token signed with `INTEGRATION_SECRET`.
+2. **Cogniview $\rightarrow$ AIO**: Cogniview attaches `EXTERNAL_AUTH_TOKEN` in the `Authorization: Bearer` header.
 
 ---
 
@@ -147,7 +153,7 @@ https://your-domain.com
 
 1. **2 Endpoints:**
    - `POST /api/TestSystem/CreateCogniviewTest`
-   - `POST /api/receive-test-results`
+   - `POST /api/TestSystem/SubmitCogniviewResult`
 
 2. **User Launch Flow:**
    - Generate JWT token and POST to Cogniview
